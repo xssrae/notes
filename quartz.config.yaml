@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
 configuration:
-  pageTitle: Quartz 5
-  pageTitleSuffix: ""
+  pageTitle: Rae Notes
+  pageTitleSuffix: "rae-notes.github.io"
   enableSPA: true
   enablePopovers: true
   analytics:
@@ -17,7 +17,7 @@ configuration:
     cdnCaching: true
     typography:
       header: Schibsted Grotesk
-      body: Source Sans Pro
+      body: Parkinsans
       code: IBM Plex Mono
     colors:
       lightMode:
@@ -101,9 +101,9 @@ plugins:
   - source: "@quartz-community/quartz-fonts"
     enabled: true
   - source: "@quartz-themes/core"
-    enabled: false
+    enabled: true
     options:
-      theme: tokyo-night
+      theme: milk-tea
       mode: both
   - source: "@quartz-community/remove-draft"
     enabled: true
@@ -253,6 +253,12 @@ plugins:
       position: beforeBody
       priority: 15
       display: all
+  - source: https://github.com/saberzero1/quartz-themes.git
+    enabled: true
+    options:
+      theme: tokyo-night
+      mode: both
+    order: 10
 layout:
   groups:
     toolbar:
