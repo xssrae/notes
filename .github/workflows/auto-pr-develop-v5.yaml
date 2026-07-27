@@ -1,0 +1,24 @@
+name: Auto PR develop -> v5
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create-pr:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create or update PR to v5
+        uses: peter-evans/create-or-update-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'chore: develop → v5'
+          body: |
+            PR automática gerada a partir do branch develop para o branch v5.
+          base: v5
+          head: develop
+          draft: false
+          labels: automatic, release

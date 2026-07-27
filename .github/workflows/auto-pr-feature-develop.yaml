@@ -1,0 +1,27 @@
+name: Auto PR feature -> develop
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'feature/**'
+    branches-ignore:
+      - 'dependabot/**'
+
+jobs:
+  create-pr:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create or update PR to develop
+        uses: peter-evans/create-or-update-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'feat: ${{ github.ref_name }} → develop'
+          body: |
+            PR automática criada a partir da branch `${{ github.ref_name }}`.
+          base: develop
+          head: ${{ github.ref_name }}
+          draft: false
+          labels: automatic, feature
