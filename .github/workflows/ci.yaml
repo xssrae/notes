@@ -11,7 +11,6 @@ on:
 
 jobs:
   build-and-test:
-    if: ${{ github.repository == 'jackyzha0/quartz' }}
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
@@ -81,3 +80,54 @@ jobs:
           version: ${{ env.PACKAGE_VERSION }}
           git_commit_sha: ${{ github.sha }}
           git_tag_prefix: "v"
+
+name: Auto PR feature -> develop
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'feature/**'
+    branches-ignore:
+      - 'dependabot/**'
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create or update PR to develop
+        uses: peter-evans/create-or-update-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'feat: ${{ github.ref_name }} → develop'
+          body: |
+            PR automática criada a partir da branch `${{ github.ref_name }}`.
+          base: develop
+          head: ${{ github.ref_name }}
+          draft: false
+          labels: automatic, feature
+
+name: Auto PR develop -> v5
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create or update PR to v5
+        uses: peter-evans/create-or-update-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'chore: develop → v5'
+          body: |
+            PR automática gerada a partir do branch develop para o branch v5.
+          base: v5
+          head: develop
+          draft: false
+          labels: automatic, release
