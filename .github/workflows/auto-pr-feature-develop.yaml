@@ -13,13 +13,40 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Create or update PR to develop
-        uses: peter-evans/create-or-update-pull-request@v4
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'feat: ${{ github.ref_name }} → develop'
-          body: |
-            PR automática criada a partir da branch `${{ github.ref_name }}`.
-          base: develop
-          head: ${{ github.ref_name }}
-          draft: false
-          labels: automatic, feature
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
+            const title = `feat: ${branch} → develop`;
+            const body = `PR automática criada a partir da branch ${branch}.`;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const head = `${owner}:${branch}`;
+            const { data: pulls } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              head,
+              base: 'develop',
+            });
+            if (pulls.length > 0) {
+              core.info(`Pull request already exists: ${pulls[0].html_url}`);
+            } else {
+              const pr = await github.rest.pulls.create({
+                owner,
+                repo,
+                title,
+                head: branch,
+                base: 'develop',
+                body,
+                draft: false,
+              });
+              core.info(`Created PR: ${pr.data.html_url}`);
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.data.number,
+                labels: ['automatic', 'feature'],
+              });
+            }
