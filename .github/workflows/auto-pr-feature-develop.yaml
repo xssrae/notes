@@ -5,8 +5,6 @@ on:
     branches:
       - 'feat/**'
       - 'feature/**'
-    branches-ignore:
-      - 'dependabot/**'
 
 jobs:
   create-pr:
