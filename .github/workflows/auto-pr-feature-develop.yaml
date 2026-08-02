@@ -3,8 +3,8 @@ name: Auto PR feature -> develop
 on:
   push:
     branches:
-      - 'feat/**'
-      - 'feature/**'
+    - 'feat/**'
+    - 'feature/**'
 
 permissions:
   contents: write
@@ -16,42 +16,42 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - name: Create or update PR to develop
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.PAT_TOKEN }}
-          script: |
-            const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
-            const title = `feat: ${branch} → develop`;
-            const body = `PR automática criada a partir da branch ${branch}.`;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const head = `${owner}:${branch}`;
-            const { data: pulls } = await github.rest.pulls.list({
+    - uses: actions/checkout@v7
+    - name: Create or update PR to develop
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.PAT_TOKEN }}
+        script: |
+          const branch = process.env.GITHUB_REF.replace('refs/heads/', '');
+          const title = `feat: ${branch} → develop`;
+          const body = `PR automática criada a partir da branch ${branch}.`;
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const head = `${owner}:${branch}`;
+          const { data: pulls } = await github.rest.pulls.list({
+            owner,
+            repo,
+            state: 'open',
+            head,
+            base: 'develop',
+          });
+          if (pulls.length > 0) {
+            core.info(`Pull request already exists: ${pulls[0].html_url}`);
+          } else {
+            const pr = await github.rest.pulls.create({
               owner,
               repo,
-              state: 'open',
-              head,
+              title,
+              head: branch,
               base: 'develop',
+              body,
+              draft: false,
             });
-            if (pulls.length > 0) {
-              core.info(`Pull request already exists: ${pulls[0].html_url}`);
-            } else {
-              const pr = await github.rest.pulls.create({
-                owner,
-                repo,
-                title,
-                head: branch,
-                base: 'develop',
-                body,
-                draft: false,
-              });
-              core.info(`Created PR: ${pr.data.html_url}`);
-              await github.rest.issues.addLabels({
-                owner,
-                repo,
-                issue_number: pr.data.number,
-                labels: ['automatic', 'feature'],
-              });
-            }
+            core.info(`Created PR: ${pr.data.html_url}`);
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: pr.data.number,
+              labels: ['automatic', 'feature'],
+            });
+          }
